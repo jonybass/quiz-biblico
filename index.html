@@ -5,38 +5,58 @@
 <title>Quiz Bíblico</title>
 <style>
 body {
-    font-family: Arial;
+    font-family: "Georgia", serif;
     text-align: center;
-    background: #f0f0f0;
+    background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+    color: #f5f5dc;
 }
 
 .container {
-    background: white;
-    padding: 20px;
-    margin: 20px auto;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 25px;
+    margin: 30px auto;
     width: 90%;
-    max-width: 500px;
-    border-radius: 10px;
+    max-width: 450px;
+    border-radius: 15px;
+    border: 1px solid #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+h2, h3, h4 {
+    color: #d4af37;
+}
+
+input {
+    width: 85%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d4af37;
+    outline: none;
+    text-align: center;
+    font-size: 16px;
+    background: #1a1a1a;
+    color: white;
+    margin-bottom: 10px;
 }
 
 button {
     padding: 12px;
-    margin: 6px 0;
+    margin: 8px 0;
     width: 100%;
     cursor: pointer;
     border: none;
-    border-radius: 8px;
-    background: #3498db;
-    color: white;
+    border-radius: 10px;
+    background: linear-gradient(45deg, #d4af37, #b8962e);
+    color: #1a1a1a;
     font-size: 16px;
+    font-weight: bold;
     transition: 0.3s;
 }
 
 button:hover {
-    background: #2980b9;
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #e6c65c, #c9a93b);
 }
-
-
 
 .hidden {
     display: none;
@@ -56,12 +76,12 @@ button:hover {
     <h2 id="bemvindo"></h2>
     <p>Pontuação: <span id="pontos">0</span></p>
 
-    <button onclick="iniciarNivel(1)">Nível 1 (Fácil)</button>
+    <button onclick="iniciarNivel(1)">Nível 1</button>
     <button onclick="iniciarNivel(2)">Nível 2</button>
     <button onclick="iniciarNivel(3)">Nível 3</button>
-    <button onclick="iniciarNivel(4)">Nível 4 (Teológico)</button>
+    <button onclick="iniciarNivel(4)">Nível 4</button>
 
-    <button onclick="resetarPontos()">🗑️ Zerar Pontos </button>
+    <button onclick="resetarPontos()"> Zerar Pontos </button>
 </div>
 
 <div class="container hidden" id="quiz">
@@ -428,8 +448,6 @@ let acertos = 0;
 
 
 function iniciarNivel(nivel) {
-    let assinatura = JONY-DEV;
-
     nivelAtual = nivel;
 
     let lista = perguntas[nivel];
@@ -519,6 +537,9 @@ function voltarMenu() {
     let confirmar = confirm("Deseja sair do quiz?");
 
     if (confirmar) {
+        pontos = parseInt(pontos) + acertos;
+        localStorage.setItem("pontos", pontos);
+
         indice = 0;
         acertos = 0;
 

@@ -58,8 +58,47 @@ button:hover {
     background: linear-gradient(45deg, #e6c65c, #c9a93b);
 }
 
+.corretas {
+    animation: piscarVerde 0.8s ease-in-out 3;
+}
+
+.errada {
+    animation: piscarVermelho 0.8s ease-in-out 3;
+}
+
+@keyframes piscarVerde {
+    0%, 100% { background: #2d7a2d; color: #fff; }
+    50% { background: #1a1a1a; color: #f5f5dc; }
+}
+
+@keyframes piscarVermelho {
+    0%, 100% { background: #a83232; color: #fff; }
+    50% { background: #1a1a1a; color: #f5f5dc; }
+}
+
+.usuario-item {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.15);
+    color: #f5f5dc;
+    cursor: pointer;
+    font-size: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.usuario-item:hover {
+    background: rgba(212, 175, 55, 0.35);
+}
+
 .hidden {
     display: none;
+}
+.lista-usuarios {
+    text-align: left;
+    margin-top: 16px;
+    font-size: 14px;
 }
 </style>
 </head>
@@ -70,6 +109,7 @@ button:hover {
     <h2>Digite seu nome</h2>
     <input id="nome" placeholder="Seu nome">
     <button onclick="salvarUsuario()">Entrar</button>
+    <div id="listaUsuarios" class="lista-usuarios"></div>
 </div>
 
 <div class="container hidden" id="menu">
@@ -82,6 +122,7 @@ button:hover {
     <button onclick="iniciarNivel(4)">Nível 4</button>
 
     <button onclick="resetarPontos()"> Zerar Pontos </button>
+    <button onclick="mostrarLogin()">Trocar usuário</button>
 </div>
 
 <div class="container hidden" id="quiz">
@@ -94,14 +135,25 @@ button:hover {
 
 <script>
 
+/* autoria: jonatas (jony-jon) */
+
 // ================= USUARIO =================
 
+let usuarios = JSON.parse(localStorage.getItem("usuarios")) || {};
 let usuario = localStorage.getItem("usuario");
-let pontos = localStorage.getItem("pontos") || 0;
+let pontos = 0;
 let nivelAtual = 1;
 
-if (usuario) {
+if (usuario && usuarios[usuario] != null) {
+    pontos = usuarios[usuario];
     mostrarMenu();
+} else if (usuario) {
+    pontos = 0;
+    usuarios[usuario] = pontos;
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    mostrarMenu();
+} else {
+    atualizarListaUsuarios();
 }
 
 function salvarUsuario() {
@@ -113,9 +165,47 @@ function salvarUsuario() {
     }
 
     usuario = nomeInput;
+    pontos = usuarios[usuario] != null ? usuarios[usuario] : 0;
+    usuarios[usuario] = pontos;
+
     localStorage.setItem("usuario", usuario);
-    localStorage.setItem("pontos", 0);
-    pontos = 0;
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    localStorage.setItem("pontos", pontos);
+
+    mostrarMenu();
+}
+
+function mostrarLogin() {
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("login").classList.remove("hidden");
+    document.getElementById("nome").value = "";
+    atualizarListaUsuarios();
+}
+
+function atualizarListaUsuarios() {
+    let div = document.getElementById("listaUsuarios");
+    if (!div) return;
+
+    let nomes = Object.keys(usuarios);
+    if (nomes.length === 0) {
+        div.innerHTML = "<p>Nenhum usuário salvo ainda.</p>";
+        return;
+    }
+
+    div.innerHTML = "<h4>Usuários salvos</h4>" +
+        nomes.map(nome => `<p><button class=\"usuario-item\" onclick=\"selecionarUsuario('${nome}')\"><strong>${nome}</strong></button>: ${usuarios[nome]} pontos</p>`).join("");
+}
+
+function selecionarUsuario(nome) {
+    usuario = nome;
+    pontos = usuarios[usuario] != null ? usuarios[usuario] : 0;
+    usuarios[usuario] = pontos;
+
+    localStorage.setItem("usuario", usuario);
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    localStorage.setItem("pontos", pontos);
+
     mostrarMenu();
 }
 
@@ -471,8 +561,10 @@ function resetarPontos() {
     let confirmar = confirm("Tem certeza que deseja zerar a pontuação?");
 
     if (confirmar) {
-        localStorage.setItem("pontos", 0);
         pontos = 0;
+        usuarios[usuario] = pontos;
+        localStorage.setItem("pontos", 0);
+        localStorage.setItem("usuarios", JSON.stringify(usuarios));
         document.getElementById("pontos").innerText = pontos;
     }
 }
@@ -494,7 +586,8 @@ function mostrarPergunta() {
     p.a.forEach((resposta, i) => {
         let btn = document.createElement("button");
         btn.innerText = resposta;
-        btn.onclick = () => responder(i);
+        btn.dataset.index = i;
+        btn.onclick = () => responder(i, btn);
         div.appendChild(btn);
     });
 }
@@ -517,19 +610,32 @@ function embaralharRespostas(pergunta) {
     return pergunta;
 }
 
-function responder(i) {
-
+function responder(i, btnSelecionado) {
     let correta = perguntasAtuais[indice].c;
+    let botoes = document.querySelectorAll("#respostas button");
+
+    botoes.forEach(btn => btn.disabled = true);
 
     if (i === correta) {
         acertos++;
-        alert("✅ Acertou!");
+        btnSelecionado.classList.add("corretas");
+        setTimeout(() => {
+            indice++;
+            mostrarPergunta();
+        }, 2400);
     } else {
-        alert("❌ Errou!");
+        btnSelecionado.classList.add("errada");
+        let botaoCorreto = Array.from(botoes).find(btn => Number(btn.dataset.index) === correta);
+        setTimeout(() => {
+            if (botaoCorreto) {
+                botaoCorreto.classList.add("corretas");
+            }
+            setTimeout(() => {
+                indice++;
+                mostrarPergunta();
+            }, 2400);
+        }, 2400);
     }
-
-    indice++;
-    mostrarPergunta();
 }
 
 function voltarMenu() {
@@ -538,7 +644,9 @@ function voltarMenu() {
 
     if (confirmar) {
         pontos = parseInt(pontos) + acertos;
+        usuarios[usuario] = pontos;
         localStorage.setItem("pontos", pontos);
+        localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
         indice = 0;
         acertos = 0;
@@ -552,7 +660,9 @@ function voltarMenu() {
 function finalizar() {
 
     pontos = parseInt(pontos) + acertos;
+    usuarios[usuario] = pontos;
     localStorage.setItem("pontos", pontos);
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
     document.getElementById("quiz").innerHTML = `
         <h2>Resultado</h2>

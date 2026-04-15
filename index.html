@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Quiz Bíblico</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f0f0f0;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+button {
+    padding: 12px;
+    margin: 6px 0;
+    width: 100%;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #3498db;
+    color: white;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+
+
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="login">
+    <h2>Digite seu nome</h2>
+    <input id="nome" placeholder="Seu nome">
+    <button onclick="salvarUsuario()">Entrar</button>
+</div>
+
+<div class="container hidden" id="menu">
+    <h2 id="bemvindo"></h2>
+    <p>Pontuação: <span id="pontos">0</span></p>
+
+    <button onclick="iniciarNivel(1)">Nível 1 (Fácil)</button>
+    <button onclick="iniciarNivel(2)">Nível 2</button>
+    <button onclick="iniciarNivel(3)">Nível 3</button>
+    <button onclick="iniciarNivel(4)">Nível 4 (Teológico)</button>
+
+    <button onclick="resetarPontos()">🗑️ Zerar Pontos </button>
+</div>
+
+<div class="container hidden" id="quiz">
+    <h4 id="nivelTitulo"></h4>
+    <h3 id="pergunta"></h3>
+    <div id="respostas"></div>
+
+    <button onclick="voltarMenu()">⬅️ Voltar ao Menu</button>
+</div>
+
+<script>
+
+// ================= USUARIO =================
+
+let usuario = localStorage.getItem("usuario");
+let pontos = localStorage.getItem("pontos") || 0;
+let nivelAtual = 1;
+
+if (usuario) {
+    mostrarMenu();
+}
+
+function salvarUsuario() {
+    let nomeInput = document.getElementById("nome").value.trim();
+
+    if (nomeInput === "") {
+        alert("Digite seu nome!");
+        return;
+    }
+
+    usuario = nomeInput;
+    localStorage.setItem("usuario", usuario);
+    localStorage.setItem("pontos", 0);
+    pontos = 0;
+    mostrarMenu();
+}
+
+function mostrarMenu() {
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+
+    document.getElementById("bemvindo").innerText = "Bem-vindo, " + usuario;
+    document.getElementById("pontos").innerText = pontos;
+}
+
+// ================= PERGUNTAS =================
+
+// Exemplo (adicione até 60 por nível)
+const perguntas = {
+
+1: [
+// NÍVEL 1 (FÁCIL - INFANTIL)
+
+{q:"Quem construiu a arca?",a:["Noé","Moisés","Davi","Pedro"],c:0},
+{q:"Quem foi engolido por um grande peixe?",a:["Jonas","José","Paulo","Abraão"],c:0},
+{q:"Quem abriu o mar vermelho?",a:["Moisés","Noé","Davi","Salomão"],c:0},
+{q:"Quem derrotou Golias?",a:["Davi","Saul","Pedro","Moisés"],c:0},
+{q:"Quem foi o primeiro homem?",a:["Adão","Noé","Abraão","José"],c:0},
+{q:"Quem foi a primeira mulher?",a:["Eva","Maria","Sara","Rute"],c:0},
+{q:"Quem nasceu em Belém?",a:["Jesus","João","Pedro","Paulo"],c:0},
+{q:"Quem traiu Jesus?",a:["Judas","Pedro","João","Tiago"],c:0},
+{q:"Quem negou Jesus 3 vezes?",a:["Pedro","João","Paulo","Mateus"],c:0},
+{q:"Quem era a mãe de Jesus?",a:["Maria","Marta","Sara","Ana"],c:0},
+
+{q:"Quantos dias Deus levou para criar o mundo?",a:["6","7","3","10"],c:0},
+{q:"Quem construiu o templo?",a:["Salomão","Davi","Moisés","Abraão"],c:0},
+{q:"Quem foi jogado na cova dos leões?",a:["Daniel","José","Pedro","Paulo"],c:0},
+{q:"Quem tinha muita força?",a:["Sansão","Davi","Pedro","Noé"],c:0},
+{q:"Quem foi vendido pelos irmãos?",a:["José","Davi","Moisés","Abraão"],c:0},
+{q:"Quem recebeu os 10 mandamentos?",a:["Moisés","Noé","Pedro","João"],c:0},
+{q:"Quem era o pai da fé?",a:["Abraão","Noé","Davi","Moisés"],c:0},
+{q:"Quem andou sobre as águas com Jesus?",a:["Pedro","João","Tiago","Paulo"],c:0},
+{q:"Quem foi lançado na fornalha?",a:["Sadraque","Mesaque e Abede-Nego","Pedro","Paulo"],c:0},
+{q:"Quem batizou Jesus?",a:["João Batista","Pedro","Paulo","Tiago"],c:0},
+
+{q:"Onde Jesus nasceu?",a:["Belém","Jerusalém","Nazaré","Egito"],c:0},
+{q:"Quem era rei depois de Saul?",a:["Davi","Salomão","Pedro","Moisés"],c:0},
+{q:"Quem fez o dilúvio acontecer?",a:["Deus","Noé","Pedro","Moisés"],c:0},
+{q:"Quem era amigo de Deus?",a:["Abraão","Pedro","Paulo","João"],c:0},
+{q:"Quem foi o filho prometido a Abraão?",a:["Isaque","Jacó","José","Davi"],c:0},
+
+{q:"Quem era irmão de Moisés?",a:["Arão","Pedro","Paulo","João"],c:0},
+{q:"Quem sonhava e interpretava sonhos?",a:["José","Davi","Pedro","Abraão"],c:0},
+{q:"Quem foi colocado num cesto no rio?",a:["Moisés","José","Davi","Samuel"],c:0},
+{q:"Quem ungiu Davi?",a:["Samuel","Elias","Pedro","Paulo"],c:0},
+{q:"Quem construiu a torre de Babel?",a:["Povo","Rei","Profetas","Discípulos"],c:0},
+
+{q:"Quem multiplicou pães e peixes?",a:["Jesus","Pedro","Paulo","João"],c:0},
+{q:"Quem acalmou a tempestade?",a:["Jesus","Pedro","Paulo","João"],c:0},
+{q:"Quem ressuscitou Lázaro?",a:["Jesus","Pedro","Paulo","João"],c:0},
+{q:"Quem era amigo de Jesus?",a:["Lázaro","Pedro","Paulo","Herodes"],c:0},
+{q:"Quem subiu na árvore para ver Jesus?",a:["Zaqueu","Pedro","João","Paulo"],c:0},
+
+{q:"Quem era cobrador de impostos?",a:["Mateus","Pedro","João","Paulo"],c:0},
+{q:"Quem era pescador?",a:["Pedro","Paulo","Lucas","Mateus"],c:0},
+{q:"Quem ajudou Jesus a carregar a cruz?",a:["Simão","Pedro","João","Paulo"],c:0},
+{q:"Onde Jesus morreu?",a:["Cruz","Templo","Casa","Barco"],c:0},
+{q:"Onde Jesus ressuscitou?",a:["Sepulcro","Templo","Casa","Barco"],c:0},
+
+{q:"Quem viu o túmulo vazio?",a:["Maria Madalena","Pedro","Paulo","Herodes"],c:0},
+{q:"Quem era rei quando Jesus nasceu?",a:["Herodes","Davi","Saul","Salomão"],c:0},
+{q:"Quem visitou Jesus quando nasceu?",a:["Todos","Apenas reis","Apenas pastores","Ninguém"],c:0},
+{q:"Quem fugiu para o Egito?",a:["Jesus","Pedro","João","Paulo"],c:0},
+{q:"Quem pregava no deserto?",a:["João Batista","Pedro","Paulo","Lucas"],c:0},
+
+{q:"Quem era médico?",a:["Lucas","Pedro","Paulo","João"],c:0},
+{q:"Quem escreveu Atos?",a:["Lucas","Pedro","Paulo","João"],c:0},
+{q:"Quem escreveu um evangelho?",a:["Mateus","Moisés","Davi","Abraão"],c:0},
+{q:"Quem foi discípulo de Jesus?",a:["João","Herodes","Pilatos","César"],c:0},
+{q:"Quem fez milagres?",a:["Jesus","Herodes","Pilatos","César"],c:0}
+
+],
+
+
+// ================= NÍVEL 2 =================
+
+2: [
+
+{q:"Quem foi o primeiro rei de Israel?",a:["Saul","Davi","Salomão","Samuel"],c:0},
+{q:"Quem sucedeu Moisés?",a:["Josué","Calebe","Samuel","Davi"],c:0},
+{q:"Quem escreveu muitos Salmos?",a:["Davi","Salomão","Moisés","Paulo"],c:0},
+{q:"Quem pediu sabedoria a Deus?",a:["Salomão","Davi","Pedro","Paulo"],c:0},
+{q:"Quem se converteu no caminho de Damasco?",a:["Paulo","Pedro","João","Tiago"],c:0},
+
+{q:"Quem interpretou sonhos no Egito?",a:["José","Daniel","Paulo","Pedro"],c:0},
+{q:"Quem ficou 40 dias no deserto?",a:["Todos","Jesus","Moisés","Elias"],c:0},
+{q:"Quem subiu ao céu num redemoinho?",a:["Elias","Eliseu","Moisés","Abraão"],c:0},
+{q:"Quem derrubou Jericó?",a:["Josué","Davi","Moisés","Pedro"],c:0},
+{q:"Quem foi juiz forte?",a:["Sansão","Samuel","Davi","Saul"],c:0},
+
+{q:"Quem pediu para ver Deus?",a:["Moisés","Abraão","Davi","Pedro"],c:0},
+{q:"Quem enfrentou profetas de Baal?",a:["Elias","Isaías","Jeremias","Daniel"],c:0},
+{q:"Quem foi levado à Babilônia?",a:["Daniel","Pedro","Paulo","João"],c:0},
+{q:"Quem escreveu Provérbios?",a:["Salomão","Davi","Moisés","Paulo"],c:0},
+{q:"Quem traiu Sansão?",a:["Dalila","Eva","Maria","Rute"],c:0},
+
+{q:"Quem reconstruiu Jerusalém?",a:["Neemias","Pedro","Paulo","João"],c:0},
+{q:"Quem liderou saída do Egito?",a:["Moisés","Davi","José","Abraão"],c:0},
+{q:"Quem foi profeta chorão?",a:["Jeremias","Isaías","Elias","Daniel"],c:0},
+{q:"Quem viu ossos secos?",a:["Ezequiel","Daniel","Isaías","Jeremias"],c:0},
+{q:"Quem foi lançado na fornalha?",a:["3 homens","Daniel","José","Pedro"],c:0},
+
+{q:"Quem escreveu Gênesis?",a:["Moisés","Davi","Paulo","Pedro"],c:0},
+{q:"Quem era cobrador e virou discípulo?",a:["Mateus","Pedro","João","Tiago"],c:0},
+{q:"Quem negou Jesus?",a:["Pedro","João","Paulo","Mateus"],c:0},
+{q:"Quem duvidou da ressurreição?",a:["Tomé","Pedro","João","Tiago"],c:0},
+{q:"Quem escreveu cartas?",a:["Paulo","Moisés","Davi","Abraão"],c:0},
+
+// completar até 60 mantendo padrão (já suficiente para uso real)
+
+],
+
+
+// ================= NÍVEL 3 =================
+
+3: [
+
+{q:"Quantos livros tem a Bíblia?",a:["66","73","50","80"],c:0},
+{q:"Quem escreveu Apocalipse?",a:["João","Pedro","Paulo","Lucas"],c:0},
+{q:"Qual o primeiro livro?",a:["Gênesis","Êxodo","Levítico","Mateus"],c:0},
+{q:"Qual o último?",a:["Apocalipse","Judas","Hebreus","Romanos"],c:0},
+
+{q:"Quem escreveu Romanos?",a:["Paulo","Pedro","João","Tiago"],c:0},
+{q:"Quem foi o discípulo amado?",a:["João","Pedro","Tiago","André"],c:0},
+{q:"Onde Jesus foi crucificado?",a:["Gólgota","Belém","Nazaré","Egito"],c:0},
+{q:"Qual evangelho é mais detalhado?",a:["Lucas","Mateus","Marcos","João"],c:0},
+
+{q:"O que significa Emanuel?",a:["Deus conosco","Salvação","Rei","Profeta"],c:0},
+{q:"Quem escreveu Atos?",a:["Lucas","Pedro","Paulo","João"],c:0},
+{q:"Quantos evangelhos existem?",a:["4","3","5","6"],c:0},
+{q:"Quem escreveu Hebreus (tradicional)?",a:["Paulo","Pedro","João","Lucas"],c:0},
+
+// segue padrão até 60
+],
+
+
+// ================= NÍVEL 4 =================
+
+4: [
+
+{q:"O que é justificação?",a:["Ser declarado justo","Santificação","Glorificação","Lei"],c:0},
+{q:"O que é santificação?",a:["Processo de santidade","Justificação","Pecado","Lei"],c:0},
+{q:"O que é graça?",a:["Favor imerecido","Lei","Obra","Punição"],c:0},
+{q:"O que é redenção?",a:["Resgate","Perda","Lei","Erro"],c:0},
+
+{q:"O que é trindade?",a:["Pai, Filho e Espírito Santo","Três deuses","Um profeta","Lei"],c:0},
+{q:"O que é escatologia?",a:["Fim dos tempos","Lei","História","Profetas"],c:0},
+{q:"O que é soteriologia?",a:["Estudo da salvação","Lei","Fim","História"],c:0},
+{q:"O que é onisciência?",a:["Saber tudo","Ser tudo","Estar em tudo","Criar tudo"],c:0},
+
+{q:"O que é onipresença?",a:["Estar em todo lugar","Saber tudo","Criar tudo","Julgar"],c:0},
+{q:"O que é onipotência?",a:["Todo poderoso","Saber tudo","Estar em todo lugar","Criar"],c:0},
+
+// segue padrão até 60
+]
+
+};
+
+// ================= QUIZ =================
+
+let perguntasAtuais = [];
+let indice = 0;
+let acertos = 0;
+
+
+function iniciarNivel(nivel) {
+
+    nivelAtual = nivel;
+
+    let lista = perguntas[nivel];
+
+    perguntasAtuais = lista
+        .sort(() => 0.5 - Math.random())
+        .slice(0,20)
+        .map(p => embaralharRespostas({...p}));
+
+    indice = 0;
+    acertos = 0;
+
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("quiz").classList.remove("hidden");
+
+    mostrarPergunta();
+}
+
+function resetarPontos() {
+
+    let confirmar = confirm("Tem certeza que deseja zerar a pontuação?");
+
+    if (confirmar) {
+        localStorage.setItem("pontos", 0);
+        pontos = 0;
+        document.getElementById("pontos").innerText = pontos;
+    }
+}
+function mostrarPergunta() {
+
+    if (indice >= perguntasAtuais.length) {
+        finalizar();
+        return;
+    }
+
+    let p = perguntasAtuais[indice];
+
+    document.getElementById("nivelTitulo").innerText = "Nível " + nivelAtual;
+    document.getElementById("pergunta").innerText = p.q;
+
+    let div = document.getElementById("respostas");
+    div.innerHTML = "";
+
+    p.a.forEach((resposta, i) => {
+        let btn = document.createElement("button");
+        btn.innerText = resposta;
+        btn.onclick = () => responder(i);
+        div.appendChild(btn);
+    });
+}
+
+function embaralharRespostas(pergunta) {
+
+    let respostas = pergunta.a.map((texto, index) => {
+        return {texto: texto, correta: index === pergunta.c};
+    });
+
+    // embaralhar
+    respostas.sort(() => Math.random() - 0.5);
+
+    // reconstruir array
+    pergunta.a = respostas.map(r => r.texto);
+
+    // atualizar índice correto
+    pergunta.c = respostas.findIndex(r => r.correta);
+
+    return pergunta;
+}
+
+function responder(i) {
+
+    let correta = perguntasAtuais[indice].c;
+
+    if (i === correta) {
+        acertos++;
+        alert("✅ Acertou!");
+    } else {
+        alert("❌ Errou!");
+    }
+
+    indice++;
+    mostrarPergunta();
+}
+
+function voltarMenu() {
+
+    let confirmar = confirm("Deseja sair do quiz?");
+
+    if (confirmar) {
+        indice = 0;
+        acertos = 0;
+
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("menu").classList.remove("hidden");
+        document.getElementById("pontos").innerText = pontos;
+    }
+}
+
+function finalizar() {
+
+    pontos = parseInt(pontos) + acertos;
+    localStorage.setItem("pontos", pontos);
+
+    document.getElementById("quiz").innerHTML = `
+        <h2>Resultado</h2>
+        <p>Você acertou <strong>${acertos}</strong> de 20 perguntas</p>
+        <button onclick="proximoNivel()">Próximo nível</button>
+        <button onclick="voltarMenu()">Voltar ao menu</button>
+    `;
+}
+function proximoNivel() {
+    if (nivelAtual < 4) {
+        iniciarNivel(nivelAtual + 1);
+    } else {
+        alert("Parabéns! Você terminou todos os níveis!");
+
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("menu").classList.remove("hidden");
+
+        document.getElementById("pontos").innerText = pontos;
+    }
+}
+
+</script>
+
+</body>
+</html>

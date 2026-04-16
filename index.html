@@ -58,6 +58,18 @@ button:hover {
     background: linear-gradient(45deg, #e6c65c, #c9a93b);
 }
 
+.btn-group {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.btn-group button {
+    flex: 1;
+    padding: 10px;
+    font-size: 15px;
+}
+
 .corretas {
     animation: piscarVerde 0.8s ease-in-out 3;
 }
@@ -121,8 +133,11 @@ button:hover {
     <button onclick="iniciarNivel(3)">Nível 3</button>
     <button onclick="iniciarNivel(4)">Nível 4</button>
 
-    <button onclick="resetarPontos()"> Zerar Pontos </button>
-    <button onclick="mostrarLogin()">Trocar usuário</button>
+    <div class="btn-group">
+    <button onclick="mostrarSobre()">Sobre o Projeto</button>
+    <button onclick="resetarPontos()">Zerar Pontos</button>
+    <button onclick="mostrarLogin()">Trocar Usuário</button>
+</div>
 </div>
 
 <div class="container hidden" id="quiz">
@@ -131,6 +146,34 @@ button:hover {
     <div id="respostas"></div>
 
     <button onclick="voltarMenu()">⬅️ Voltar ao Menu</button>
+</div>
+
+<div class="container hidden" id="sobre">
+    <h2>Sobre o Projeto</h2>
+
+    <p>
+        Este Quiz Bíblico foi criado para oferecer uma experiência interativa 
+        e educativa para quem deseja testar seus conhecimentos sobre a Bíblia.
+    </p>
+
+    <p>
+        O projeto surgiu a partir do pedido de um amigo, com a ideia de criar
+        algo simples, acessível e ao mesmo tempo envolvente.
+    </p>
+
+    <h3>O que ele faz</h3>
+    <ul style="text-align:left; display:inline-block; margin:0; padding-left:20px;">
+        <li>Permite escolher entre vários níveis de dificuldade.</li>
+        <li>Registra pontuação por usuário.</li>
+        <li>Apresenta perguntas e respostas de forma simples e direta.</li>
+        <li>Permite trocar de usuário e manter pontuação salva.</li>
+    </ul>
+
+    <p style="margin-top:15px;">
+        <strong>Desenvolvido por:</strong> Jonatas Candido (jony-jon)
+    </p>
+
+    <button onclick="mostrarMenu()">Voltar ao menu</button>
 </div>
 
 <script>
@@ -211,10 +254,19 @@ function selecionarUsuario(nome) {
 
 function mostrarMenu() {
     document.getElementById("login").classList.add("hidden");
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("sobre").classList.add("hidden");
     document.getElementById("menu").classList.remove("hidden");
 
     document.getElementById("bemvindo").innerText = "Bem-vindo, " + usuario;
     document.getElementById("pontos").innerText = pontos;
+}
+
+function mostrarSobre() {
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("sobre").classList.remove("hidden");
 }
 
 // ================= PERGUNTAS =================
@@ -568,6 +620,7 @@ function resetarPontos() {
         document.getElementById("pontos").innerText = pontos;
     }
 }
+
 function mostrarPergunta() {
 
     if (indice >= perguntasAtuais.length) {
@@ -639,22 +692,17 @@ function responder(i, btnSelecionado) {
 }
 
 function voltarMenu() {
+    pontos = parseInt(pontos) + acertos;
+    usuarios[usuario] = pontos;
+    localStorage.setItem("pontos", pontos);
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
-    let confirmar = confirm("Deseja sair do quiz?");
+    indice = 0;
+    acertos = 0;
 
-    if (confirmar) {
-        pontos = parseInt(pontos) + acertos;
-        usuarios[usuario] = pontos;
-        localStorage.setItem("pontos", pontos);
-        localStorage.setItem("usuarios", JSON.stringify(usuarios));
-
-        indice = 0;
-        acertos = 0;
-
-        document.getElementById("quiz").classList.add("hidden");
-        document.getElementById("menu").classList.remove("hidden");
-        document.getElementById("pontos").innerText = pontos;
-    }
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+    document.getElementById("pontos").innerText = pontos;
 }
 
 function finalizar() {

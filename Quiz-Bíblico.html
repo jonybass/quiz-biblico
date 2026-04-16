@@ -133,9 +133,11 @@ button:hover {
     <button onclick="iniciarNivel(3)">Nível 3</button>
     <button onclick="iniciarNivel(4)">Nível 4</button>
 
-    <div class="btn-group">
+   <div class="btn-group">
     <button onclick="mostrarSobre()">Sobre o Projeto</button>
     <button onclick="resetarPontos()">Zerar Pontos</button>
+    <button onclick="renomearUsuario()">Renomear</button>
+    <button onclick="excluirUsuario()">Excluir Usuário</button>
     <button onclick="mostrarLogin()">Trocar Usuário</button>
 </div>
 </div>
@@ -190,12 +192,12 @@ let nivelAtual = 1;
 if (usuario && usuarios[usuario] != null) {
     pontos = usuarios[usuario];
     mostrarMenu();
-} else if (usuario) {
-    pontos = 0;
-    usuarios[usuario] = pontos;
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
-    mostrarMenu();
-} else {
+} 
+else if (usuario && usuarios[usuario] == null) {
+    localStorage.removeItem("usuario");
+    mostrarLogin();
+} 
+else {
     atualizarListaUsuarios();
 }
 
@@ -232,7 +234,7 @@ function atualizarListaUsuarios() {
 
     let nomes = Object.keys(usuarios);
     if (nomes.length === 0) {
-        div.innerHTML = "<p>Nenhum usuário salvo ainda.</p>";
+        div.innerHTML = "<p>Sem Usuários.</p>";
         return;
     }
 
@@ -411,10 +413,6 @@ const perguntas = {
 {q:"Quem falou com Deus no monte Sinai?",a:["Moisés","Abraão","Davi","Pedro"],c:0}
 
 ],
-
-
-
-
 
 // ================= NÍVEL 3 =================
 
@@ -607,6 +605,57 @@ function iniciarNivel(nivel) {
 
     mostrarPergunta();
 }
+
+function renomearUsuario() {
+    let novoNome = prompt("Digite o novo nome:");
+
+    if (!novoNome || novoNome.trim() === "") {
+        alert("Nome inválido!");
+        return;
+    }
+
+    novoNome = novoNome.trim();
+
+    if (usuarios[novoNome]) {
+        alert("Esse nome já existe!");
+        return;
+    }
+
+    // salva pontos no novo nome
+    usuarios[novoNome] = usuarios[usuario];
+
+    // remove antigo
+    delete usuarios[usuario];
+
+    // atualiza usuário atual
+    usuario = novoNome;
+
+    // salva no localStorage
+    localStorage.setItem("usuario", usuario);
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+    mostrarMenu();
+}
+
+
+function excluirUsuario() {
+    let confirmar = confirm("Tem certeza que deseja excluir este usuário?");
+
+    if (!confirmar) return;
+
+    // remove usuário atual
+    delete usuarios[usuario];
+
+    // limpa localStorage
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    localStorage.removeItem("usuario");
+
+    usuario = null;
+    pontos = 0;
+
+    mostrarLogin();
+}
+
 
 function resetarPontos() {
 

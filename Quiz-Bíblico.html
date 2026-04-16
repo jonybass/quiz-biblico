@@ -120,6 +120,7 @@ button:hover {
 <div class="container" id="login">
     <h2>Digite seu nome</h2>
     <input id="nome" placeholder="Seu nome">
+    <input id="senha" type="password" placeholder="Sua senha">
     <button onclick="salvarUsuario()">Entrar</button>
     <div id="listaUsuarios" class="lista-usuarios"></div>
 </div>
@@ -203,19 +204,35 @@ else {
 
 function salvarUsuario() {
     let nomeInput = document.getElementById("nome").value.trim();
+    let senhaInput = document.getElementById("senha").value.trim();
 
-    if (nomeInput === "") {
-        alert("Digite seu nome!");
+    if (nomeInput === "" || senhaInput === "") {
+        alert("Digite nome e senha!");
         return;
     }
 
     usuario = nomeInput;
-    pontos = usuarios[usuario] != null ? usuarios[usuario] : 0;
-    usuarios[usuario] = pontos;
+
+    // se usuário já existe
+    if (usuarios[usuario]) {
+        // valida senha
+        if (usuarios[usuario].senha !== senhaInput) {
+            alert("Senha incorreta!");
+            return;
+        }
+
+        pontos = usuarios[usuario].pontos;
+    } else {
+        // cria novo usuário
+        usuarios[usuario] = {
+            senha: senhaInput,
+            pontos: 0
+        };
+        pontos = 0;
+    }
 
     localStorage.setItem("usuario", usuario);
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
-    localStorage.setItem("pontos", pontos);
 
     mostrarMenu();
 }
@@ -239,13 +256,19 @@ function atualizarListaUsuarios() {
     }
 
     div.innerHTML = "<h4>Usuários salvos</h4>" +
-        nomes.map(nome => `<p><button class=\"usuario-item\" onclick=\"selecionarUsuario('${nome}')\"><strong>${nome}</strong></button>: ${usuarios[nome]} pontos</p>`).join("");
+        nomes.map(nome =>
+  `<p>
+    <button class="usuario-item" onclick="selecionarUsuario('${nome}')">
+      <strong>${nome}</strong>
+    </button>: ${usuarios[nome].pontos} pontos
+  </p>`
+).join("")
 }
 
 function selecionarUsuario(nome) {
     usuario = nome;
-    pontos = usuarios[usuario] != null ? usuarios[usuario] : 0;
-    usuarios[usuario] = pontos;
+    pontos = usuarios[usuario]?.pontos ?? 0;
+    usuarios[usuario].pontos = pontos;
 
     localStorage.setItem("usuario", usuario);
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
@@ -261,7 +284,7 @@ function mostrarMenu() {
     document.getElementById("menu").classList.remove("hidden");
 
     document.getElementById("bemvindo").innerText = "Bem-vindo, " + usuario;
-    document.getElementById("pontos").innerText = pontos;
+    document.getElementById("pontos").innerText = usuarios[usuario].pontos;
 }
 
 function mostrarSobre() {
@@ -663,10 +686,10 @@ function resetarPontos() {
 
     if (confirmar) {
         pontos = 0;
-        usuarios[usuario] = pontos;
+        usuarios[usuario].pontos = pontos;
         localStorage.setItem("pontos", 0);
         localStorage.setItem("usuarios", JSON.stringify(usuarios));
-        document.getElementById("pontos").innerText = pontos;
+        document.getElementById("pontos").innerText = usuarios[usuario].pontos;
     }
 }
 
@@ -742,7 +765,7 @@ function responder(i, btnSelecionado) {
 
 function voltarMenu() {
     pontos = parseInt(pontos) + acertos;
-    usuarios[usuario] = pontos;
+    usuarios[usuario].pontos = pontos;
     localStorage.setItem("pontos", pontos);
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
@@ -751,13 +774,13 @@ function voltarMenu() {
 
     document.getElementById("quiz").classList.add("hidden");
     document.getElementById("menu").classList.remove("hidden");
-    document.getElementById("pontos").innerText = pontos;
+    document.getElementById("pontos").innerText = usuarios[usuario].pontos;
 }
 
 function finalizar() {
 
     pontos = parseInt(pontos) + acertos;
-    usuarios[usuario] = pontos;
+    usuarios[usuario].pontos = pontos;
     localStorage.setItem("pontos", pontos);
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
@@ -777,7 +800,7 @@ function proximoNivel() {
         document.getElementById("quiz").classList.add("hidden");
         document.getElementById("menu").classList.remove("hidden");
 
-        document.getElementById("pontos").innerText = pontos;
+        document.getElementById("pontos").innerText = usuarios[usuario].pontos;
     }
 }
 

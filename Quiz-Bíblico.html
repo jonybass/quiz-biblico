@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Quiz Bíblico</title>
+<script>
+    document.title= "Quiz Bíblico - ";
+</script>
 <style>
 body {
     font-family: "Georgia", serif;
@@ -118,6 +121,7 @@ button:hover {
 <body>
 
 <div class="container hidden" id="loginSenha">
+    <h2>Quiz Bíblico</h2>
     <h2>Digite sua senha</h2>
     <p id="usuarioSelecionado"></p>
 
@@ -128,6 +132,7 @@ button:hover {
 </div>
 
 <div class="container" id="login">
+    <h2>Quiz Bíblico</h2>
     <h2>Digite seu nome</h2>
     <input id="nome" placeholder="Seu nome">
     <input id="senha" type="password" placeholder="Sua senha">
@@ -136,6 +141,7 @@ button:hover {
 </div>
 
 <div class="container hidden" id="menu">
+     <h2>Quiz Bíblico</h2>
     <h2 id="bemvindo"></h2>
     <p>Pontuação: <span id="pontos">0</span></p>
 
@@ -154,6 +160,7 @@ button:hover {
 </div>
 
 <div class="container hidden" id="quiz">
+    <h2>Quiz Bíblico</h2>
     <h4 id="nivelTitulo"></h4>
     <h3 id="pergunta"></h3>
     <div id="respostas"></div>
@@ -162,6 +169,7 @@ button:hover {
 </div>
 
 <div class="container hidden" id="sobre">
+    <h2>Quiz Bíblico</h2>
     <h2>Sobre o Projeto</h2>
 
     <p>
@@ -248,6 +256,7 @@ function salvarUsuario() {
 }
 
 function mostrarLogin() {
+    document.title = "📖 Quiz Bíblico";
     document.getElementById("menu").classList.add("hidden");
     document.getElementById("quiz").classList.add("hidden");
     document.getElementById("login").classList.remove("hidden");
@@ -303,6 +312,7 @@ function atualizarListaUsuarios() {
 
 
 function mostrarMenu() {
+    mudarTitulo(usuario);
     document.getElementById("login").classList.add("hidden");
     document.getElementById("quiz").classList.add("hidden");
     document.getElementById("sobre").classList.add("hidden");
@@ -313,6 +323,7 @@ function mostrarMenu() {
 }
 
 function mostrarSobre() {
+    mudarTitulo("Sobre");
     document.getElementById("login").classList.add("hidden");
     document.getElementById("menu").classList.add("hidden");
     document.getElementById("quiz").classList.add("hidden");
@@ -648,6 +659,7 @@ function iniciarNivel(nivel) {
     indice = 0;
     acertos = 0;
 
+    mudarTitulo("Nível " + nivelAtual);
     document.getElementById("menu").classList.add("hidden");
     document.getElementById("quiz").classList.remove("hidden");
 
@@ -847,6 +859,11 @@ function voltarMenu() {
     document.getElementById("pontos").innerText = usuarios[usuario].pontos;
 }
 
+
+function mudarTitulo(textoExtra = "") {
+    document.title = "Quiz Bíblico" + (textoExtra ? " - " + textoExtra : "");
+}
+
 function finalizar() {
 
     pontos = parseInt(pontos) + acertos;
@@ -854,6 +871,7 @@ function finalizar() {
     localStorage.setItem("pontos", pontos);
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
+    mudarTitulo("Resultado");
     document.getElementById("quiz").innerHTML = `
         <h2>Resultado</h2>
         <p>Você acertou <strong>${acertos}</strong> de 20 perguntas</p>

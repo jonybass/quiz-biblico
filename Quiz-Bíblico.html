@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="UTF-8">
 <title>Quiz Bíblico</title>
 <script>
@@ -29,6 +30,15 @@ h2, h3, h4 {
     color: #d4af37;
 }
 
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+    -webkit-text-fill-color: white !important;
+}
+input:focus {
+    background: #1a1a1a;
+    color: white;
+    outline: none;
+}
 input {
     width: 85%;
     padding: 10px;
@@ -55,7 +65,13 @@ button {
     font-weight: bold;
     transition: 0.3s;
 }
-
+p {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 10px 0;
+    color: rgba(245, 245, 63, 0.85);
+    text-align: center;
+}
 button:hover {
     transform: scale(1.05);
     background: linear-gradient(45deg, #e6c65c, #c9a93b);
@@ -221,33 +237,49 @@ else {
 }
 
 function salvarUsuario() {
-    let nomeInput = document.getElementById("nome").value.trim();
-    let senhaInput = document.getElementById("senha").value.trim();
+    let nomeInput = document.getElementById("nome").value;
+    let senhaInput = document.getElementById("senha").value;
 
-    if (nomeInput === "" || senhaInput === "") {
+    // remove espaços extras nas pontas
+    let nome = nomeInput.trim();
+
+    // 🔴 validações
+
+    if (nome === "" || senhaInput.trim() === "") {
         alert("Digite nome e senha!");
         return;
     }
 
-    usuario = nomeInput;
-
-    // se usuário já existe
-    if (usuarios[usuario]) {
-        // valida senha
-        if (usuarios[usuario].senha !== senhaInput) {
-            alert("Senha incorreta!");
-            return;
-        }
-
-        pontos = usuarios[usuario].pontos;
-    } else {
-        // cria novo usuário
-        usuarios[usuario] = {
-            senha: senhaInput,
-            pontos: 0
-        };
-        pontos = 0;
+    // impede múltiplos espaços seguidos
+    if (nome.includes("  ")) {
+        alert("O nome só pode conter um espaço entre palavras.");
+        return;
     }
+
+    // permite emoji e símbolos, mas impede só espaços
+    if (/^ +$/.test(nome)) {
+        alert("Nome inválido!");
+        return;
+    }
+
+    // verifica duplicados ignorando maiúsculas/minúsculas
+    let existente = Object.keys(usuarios).find(
+        u => u.toLowerCase() === nome.toLowerCase()
+    );
+
+    if (existente) {
+        alert("Esse usuário já está cadastrado!");
+        return;
+    }
+
+    // cria usuário
+    usuarios[nome] = {
+        senha: senhaInput,
+        pontos: 0
+    };
+
+    usuario = nome;
+    pontos = 0;
 
     localStorage.setItem("usuario", usuario);
     localStorage.setItem("usuarios", JSON.stringify(usuarios));

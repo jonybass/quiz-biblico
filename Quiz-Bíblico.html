@@ -117,6 +117,16 @@ button:hover {
 
 <body>
 
+<div class="container hidden" id="loginSenha">
+    <h2>Digite sua senha</h2>
+    <p id="usuarioSelecionado"></p>
+
+    <input id="senhaLogin" type="password" placeholder="Senha">
+
+    <button onclick="confirmarLogin()">Entrar</button>
+    <button onclick="voltarListaUsuarios()">Cancelar</button>
+</div>
+
 <div class="container" id="login">
     <h2>Digite seu nome</h2>
     <input id="nome" placeholder="Seu nome">
@@ -191,7 +201,7 @@ let pontos = 0;
 let nivelAtual = 1;
 
 if (usuario && usuarios[usuario] != null) {
-    pontos = usuarios[usuario];
+    pontos = usuarios[usuario].pontos;
     mostrarMenu();
 } 
 else if (usuario && usuarios[usuario] == null) {
@@ -258,24 +268,39 @@ function atualizarListaUsuarios() {
     div.innerHTML = "<h4>Usuários salvos</h4>" +
         nomes.map(nome =>
   `<p>
-    <button class="usuario-item" onclick="selecionarUsuario('${nome}')">
+    <button class="usuario-item" onclick="abrirLoginSenha('${nome}')">
       <strong>${nome}</strong>
     </button>: ${usuarios[nome].pontos} pontos
   </p>`
 ).join("")
 }
 
-function selecionarUsuario(nome) {
+/* function selecionarUsuario(nome) {
+    let senha = prompt("Digite a senha de " + nome + ":");
+
+    if (!senha) {
+        alert("Senha obrigatória!");
+        return;
+    }
+
+    if (!usuarios[nome]) {
+        alert("Usuário não encontrado!");
+        return;
+    }
+
+    if (usuarios[nome].senha !== senha) {
+        alert("Senha incorreta!");
+        return;
+    }
+
     usuario = nome;
-    pontos = usuarios[usuario]?.pontos ?? 0;
-    usuarios[usuario].pontos = pontos;
+    pontos = usuarios[usuario].pontos;
 
     localStorage.setItem("usuario", usuario);
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
-    localStorage.setItem("pontos", pontos);
 
     mostrarMenu();
-}
+}*/
+
 
 function mostrarMenu() {
     document.getElementById("login").classList.add("hidden");
@@ -715,6 +740,51 @@ function mostrarPergunta() {
         btn.onclick = () => responder(i, btn);
         div.appendChild(btn);
     });
+}
+
+let usuarioTemp = "";
+
+function abrirLoginSenha(nome) {
+    usuarioTemp = nome;
+
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("loginSenha").classList.remove("hidden");
+
+    document.getElementById("usuarioSelecionado").innerText = "Usuário: " + nome;
+    document.getElementById("senhaLogin").value = "";
+}
+
+
+
+function confirmarLogin() {
+    let senha = document.getElementById("senhaLogin").value;
+
+    if (!senha) {
+        alert("Digite a senha!");
+        return;
+    }
+
+    if (usuarios[usuarioTemp].senha !== senha) {
+        alert("Senha incorreta!");
+        return;
+    }
+
+    usuario = usuarioTemp;
+    pontos = usuarios[usuario].pontos;
+
+    localStorage.setItem("usuario", usuario);
+
+    document.getElementById("loginSenha").classList.add("hidden");
+
+    mostrarMenu();
+}
+
+function voltarListaUsuarios() {
+    document.getElementById("loginSenha").classList.add("hidden");
+    document.getElementById("login").classList.remove("hidden");
+
+    atualizarListaUsuarios();
 }
 
 function embaralharRespostas(pergunta) {
